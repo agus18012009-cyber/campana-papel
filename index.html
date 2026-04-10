@@ -30,6 +30,38 @@
 
     <div class="auth-card">
 
+      <!-- COMPLETAR PERFIL (usuario Auth sin perfil) -->
+      <div id="panel-complete" style="display:none;">
+        <h2>Completar registro</h2>
+        <p style="font-size:.88rem;color:#6b7280;margin-bottom:16px;">
+          Tu cuenta existe pero falta completar tu perfil.
+        </p>
+        <form id="form-complete">
+          <div class="form-group">
+            <label for="cmp-name">Nombre completo *</label>
+            <input type="text" id="cmp-name" placeholder="Nombre Apellido" required />
+          </div>
+          <div class="form-group">
+            <label for="cmp-course">Tu curso *</label>
+            <select id="cmp-course" required>
+              <option value="" disabled selected>Seleccioná tu curso</option>
+              <option value="5°1°">5° 1°</option>
+              <option value="5°2°">5° 2°</option>
+              <option value="5°3°">5° 3°</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cmp-code">
+              Código de administrador
+              <span class="opt">(opcional)</span>
+            </label>
+            <input type="password" id="cmp-code" placeholder="Solo si sos administrador/a" />
+          </div>
+          <div class="auth-error" id="err-complete" style="display:none;"></div>
+          <button type="submit" class="btn-primary">Guardar y continuar</button>
+        </form>
+      </div>
+
       <!-- LOGIN -->
       <div id="panel-login">
         <h2>Iniciar sesión</h2>
