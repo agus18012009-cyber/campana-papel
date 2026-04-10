@@ -1,1 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campaña Papel Verde — Control de Asistencia</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
 
+<!-- ══ Loading ═══════════════════════════════════════════════ -->
+<div id="loading" style="display:none;">
+  <div class="spinner"></div>
+</div>
+
+<!-- ══ Toast ══════════════════════════════════════════════════ -->
+<div id="toast"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     AUTH SCREEN
+════════════════════════════════════════════════════════════ -->
+<div id="screen-auth">
+  <div class="auth-wrap">
+
+    <div class="auth-brand">
+      <span class="bi">♻</span>
+      <h1>Campaña Papel Verde</h1>
+      <p>Control de Asistencia · Concientización</p>
+    </div>
+
+    <div class="auth-card">
+
+      <!-- LOGIN -->
+      <div id="panel-login">
+        <h2>Iniciar sesión</h2>
+        <form id="form-login">
+          <div class="form-group">
+            <label for="log-email">Correo electrónico</label>
+            <input type="email" id="log-email" placeholder="tu@correo.com"
+                   required autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label for="log-password">Contraseña</label>
+            <input type="password" id="log-password" placeholder="••••••••"
+                   required autocomplete="current-password" />
+          </div>
+          <div class="auth-error" id="err-login" style="display:none;"></div>
+          <button type="submit" class="btn-primary">Entrar</button>
+        </form>
+        <p class="auth-switch">¿No tenés cuenta? <a id="go-register">Registrate</a></p>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="panel-register" style="display:none;">
+        <h2>Crear cuenta</h2>
+        <form id="form-register">
+          <div class="form-group">
+            <label for="reg-name">Nombre completo *</label>
+            <input type="text" id="reg-name" placeholder="Nombre Apellido"
+                   required autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <label for="reg-course">Tu curso *</label>
+            <select id="reg-course" required>
+              <option value="" disabled selected>Seleccioná tu curso</option>
+              <option value="5°1°">5° 1°</option>
+              <option value="5°2°">5° 2°</option>
+              <option value="5°3°">5° 3°</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="reg-email">Correo electrónico *</label>
+            <input type="email" id="reg-email" placeholder="tu@correo.com"
+                   required autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Contraseña *</label>
+            <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres"
+                   required autocomplete="new-password" />
+          </div>
+          <div class="form-group">
+            <label for="reg-code">
+              Código de administrador
+              <span class="opt">(opcional — dejalo vacío si sos alumno/a)</span>
+            </label>
+            <input type="password" id="reg-code" placeholder="Solo si sos administrador/a"
+                   autocomplete="off" />
+          </div>
+          <div class="auth-error" id="err-register" style="display:none;"></div>
+          <button type="submit" class="btn-primary">Crear cuenta</button>
+        </form>
+        <p class="auth-switch">¿Ya tenés cuenta? <a id="go-login">Iniciá sesión</a></p>
+      </div>
+
+    </div><!-- /auth-card -->
+  </div><!-- /auth-wrap -->
+</div><!-- /screen-auth -->
+
+<!-- ══════════════════════════════════════════════════════════
+     APP SCREEN
+════════════════════════════════════════════════════════════ -->
+<div id="screen-app" style="display:none; flex-direction:column; min-height:100vh;">
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="brand-sm">♻</span>
+        <h1>Campaña Papel Verde</h1>
+      </div>
+      <div class="header-user">
+        <div class="user-chips">
+          <span id="hdr-name"   class="chip"></span>
+          <span id="hdr-course" class="chip"></span>
+          <span id="hdr-admin"  class="chip admin-chip" style="display:none;">ADMIN</span>
+        </div>
+        <button class="btn-ghost" id="btn-logout">Salir</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── STUDENT VIEW ─────────────────────────────────────── -->
+  <div id="view-student" style="display:none; flex:1;">
+    <div class="container">
+
+      <div class="view-header">
+        <h2 id="student-month-title">Mes actual</h2>
+        <p class="view-subtitle">
+          Tocá un curso <strong>gris</strong> para registrar que lo visitaste.
+          Los verdes claros fueron visitados por compañeros; los verdes oscuros, por vos.
+        </p>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-labels">
+          <span id="prog-label">0 visitados</span>
+          <span id="prog-total">de 19 cursos</span>
+        </div>
+        <div class="progress-track">
+          <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div id="student-grid" class="courses-grid"></div>
+
+    </div>
+  </div><!-- /view-student -->
+
+  <!-- ── ADMIN VIEW ────────────────────────────────────────── -->
+  <div id="view-admin" style="display:none; flex:1;">
+    <div class="container">
+
+      <div class="view-header">
+        <h2>Panel de Administración</h2>
+        <div class="admin-controls">
+          <select id="admin-filter-month" aria-label="Filtrar por mes"></select>
+          <select id="admin-filter-course" aria-label="Filtrar por curso">
+            <option value="">Todos los cursos</option>
+            <option value="5°1°">5° 1°</option>
+            <option value="5°2°">5° 2°</option>
+            <option value="5°3°">5° 3°</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="admin-stats">
+        <div class="stat-card">
+          <span id="stat-total"    class="stat-num">0</span>
+          <span class="stat-label">Registros totales</span>
+        </div>
+        <div class="stat-card">
+          <span id="stat-courses"  class="stat-num">0</span>
+          <span class="stat-label">Cursos cubiertos</span>
+        </div>
+        <div class="stat-card">
+          <span id="stat-students" class="stat-num">0</span>
+          <span class="stat-label">Alumnos activos</span>
+        </div>
+      </div>
+
+      <!-- Admin course grid -->
+      <div id="admin-grid" class="courses-grid"></div>
+
+      <!-- Full table -->
+      <div class="table-section">
+        <h3>Registro completo</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Curso visitado</th>
+                <th>Alumno</th>
+                <th class="col-student-course">Curso del alumno</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="admin-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /view-admin -->
+
+</div><!-- /screen-app -->
+
+<!-- ══ Visit Modal ════════════════════════════════════════════ -->
+<div id="modal-visit" class="modal-backdrop" style="display:none;" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header"><h3>Confirmar visita</h3></div>
+    <div class="modal-body">
+      <p>¿Confirmás que visitaste:</p>
+      <p class="modal-course" id="modal-course-name"></p>
+      <p class="modal-date"   id="modal-date-text"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" id="modal-cancel">Cancelar</button>
+      <button class="btn-primary"   id="modal-confirm" style="width:auto; margin-top:0;">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Delete Modal ═══════════════════════════════════════════ -->
+<div id="modal-delete" class="modal-backdrop" style="display:none;" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header"><h3>Eliminar registro</h3></div>
+    <div class="modal-body">
+      <p id="modal-delete-msg">¿Seguro que querés eliminar este registro? Esta acción no se puede deshacer.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" id="delete-cancel">Cancelar</button>
+      <button class="btn-danger"    id="delete-confirm">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Supabase SDK ════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
