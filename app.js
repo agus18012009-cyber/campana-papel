@@ -72,7 +72,7 @@ function authErr(codeOrMsg) {
     'user_already_exists':   'Ya existe una cuenta con ese email.',
     'weak_password':         'La contraseña debe tener al menos 6 caracteres.',
     'email_address_invalid': 'El email ingresado no es válido.',
-    'over_email_send_rate_limit': 'Demasiados intentos. Esperá unos minutos.',
+    'over_email_send_rate_limit': 'Límite de registros alcanzado. En Supabase → Authentication → Email desactivá "Confirm email", o esperá unos minutos.',
   };
   return map[codeOrMsg] || 'Error: ' + codeOrMsg;
 }
@@ -608,3 +608,4 @@ document.getElementById('delete-confirm').addEventListener('click', async () => 
     await loadAdminData();
   }
 });
+
