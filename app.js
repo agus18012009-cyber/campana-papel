@@ -81,6 +81,18 @@ function authErr(codeOrMsg) {
 function showAuth() {
   document.getElementById('screen-auth').style.display = 'flex';
   document.getElementById('screen-app').style.display  = 'none';
+  // Mostrar panel de login por defecto
+  document.getElementById('panel-complete').style.display  = 'none';
+  document.getElementById('panel-login').style.display     = 'block';
+  document.getElementById('panel-register').style.display  = 'none';
+}
+
+function showCompleteProfile() {
+  document.getElementById('screen-auth').style.display     = 'flex';
+  document.getElementById('screen-app').style.display      = 'none';
+  document.getElementById('panel-login').style.display     = 'none';
+  document.getElementById('panel-register').style.display  = 'none';
+  document.getElementById('panel-complete').style.display  = 'block';
 }
 
 function showApp() {
@@ -127,10 +139,10 @@ sb.auth.onAuthStateChange(async (event, session) => {
       .single();
 
     if (error || !data) {
-      // Perfil no encontrado (caso raro) → cerrar sesión
-      await sb.auth.signOut();
-      showAuth();
+      // El usuario existe en Auth pero no tiene perfil guardado.
+      // Mostrar formulario de completar registro en lugar de cerrar sesión.
       showLoading(false);
+      showCompleteProfile();
       return;
     }
 
@@ -142,6 +154,49 @@ sb.auth.onAuthStateChange(async (event, session) => {
     showAuth();
   }
 
+  showLoading(false);
+});
+
+// ── Completar perfil faltante ─────────────────────────────────
+document.getElementById('form-complete').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById('err-complete');
+  errEl.style.display = 'none';
+
+  const name   = document.getElementById('cmp-name').value.trim();
+  const course = document.getElementById('cmp-course').value;
+  const code   = document.getElementById('cmp-code').value.trim();
+
+  if (!name || !course) {
+    errEl.textContent   = 'Completá nombre y curso.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const { data: sessionData } = await sb.auth.getSession();
+  const userId = sessionData?.session?.user?.id;
+  if (!userId) {
+    errEl.textContent   = 'Sesión expirada. Volvé a iniciar sesión.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const role = (code === ADMIN_CODE) ? 'admin' : 'student';
+  showLoading(true);
+
+  const { error } = await sb.from('profiles').insert({ id: userId, name, course, role });
+
+  if (error) {
+    showLoading(false);
+    errEl.textContent   = 'Error al guardar. Intentá de nuevo.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Recargar el perfil y entrar a la app
+  profile = { id: userId, name, course, role };
+  showApp();
+  subscribeRealtime();
   showLoading(false);
 });
 
@@ -608,4 +663,3 @@ document.getElementById('delete-confirm').addEventListener('click', async () => 
     await loadAdminData();
   }
 });
-
